@@ -58,8 +58,10 @@ def get_status(eyestatus):
     return left,right
         
 if __name__ == "__main__":
-    eye_list = open('eye_list.txt','w')
+    train_list = open('train_list.txt','w')
+#    test_list = open('test_list.txt','w')
     for file_name in os.listdir(full_image_path):
+#        print(file_name)
         record_name = os.path.join(image_info_path,os.path.splitext(file_name)[0]+'.npy')
         if (not os.path.exists(record_name)):
             continue
@@ -77,16 +79,29 @@ if __name__ == "__main__":
         left = image[left[2]:left[3],left[0]:left[1]]
         right = image[right[2]:right[3],right[0]:right[1]]
         
+        if (sum(left[left>255])>0):
+            print(file_name)
+            continue;
+        if (sum(left[left<0])>0):
+            print(file_name)
+            continue;
+        if (sum(right[right>255])>0):
+            print(file_name)
+            continue;
+        if (sum(right[right<0])>0):
+            print(file_name)
+            continue;            
+        
         eyestatus = get_status(eyestatus)
         if (not eyestatus[0]==-1):
             cv2.imwrite(os.path.join(eye_image_path,'left_'+file_name),left)
-            eye_list.write('left_'+file_name+'\n')
+            train_list.write('left_'+file_name+' '+str(eyestatus[0])+'\n')
         if (not eyestatus[1]==-1):
             cv2.imwrite(os.path.join(eye_image_path,'right_'+file_name),right)        
-            eye_list.write('right_'+file_name+'\n')
+            train_list.write('right_'+file_name+' '+str(eyestatus[1])+'\n')
             
 #    info = np.load('036_noglasses_sleepyCombination_002882.npy').item()
 #    image = cv2.imread('036_noglasses_sleepyCombination_002882.jpg')
 #    landmark = info['faces'][0]['landmark']
 ##    landmark = np.asarray(info['faces'][0]['landmark'].values())
-    eye_list.close()
+    train_list.close()
